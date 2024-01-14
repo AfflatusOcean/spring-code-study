@@ -47,6 +47,8 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * @return the type of the bean, or {@code null} if not predictable
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
+
+	//预测从此处理器的 #postProcessBeforeInstantiation 回调返回的bean的类型
 	@Nullable
 	default Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
@@ -61,6 +63,7 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * @return the candidate constructors, or {@code null} if none specified
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
+	//指定给定bean的构造函数
 	@Nullable
 	default Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName)
 			throws BeansException {
@@ -90,6 +93,16 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * (typically with the passed-in bean instance as default)
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
+
+
+	//为了解决循环引用，提前获取指定bean的引用。
+	//此回调为后处理器提供了一个机会，可以在目标bean实例完全初始化之前暴露一个包装器。
+	//暴露的对象应当等同于 #postProcessBeforeInitialization /
+	//postProcessAfterInitialization 否则会暴露。需要注意的是，
+	//由此方法返回的对象将被用作bean引用，除非后处理器从上述后处理回调中返回一个不同的包装器。
+	//默认实现返回给定的 bean 原样。
+	//同时提供AOP返回代理对象的机会
+
 	default Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
